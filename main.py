@@ -37,7 +37,7 @@ class Variables:
         self.length = 100
         self.length = self.length//self.MOVE_SPEED
 
-        # Count (for list purposes)
+        # Make a count variable (for list purposes)
         self.count = 0
 
         # Make x and y lists
