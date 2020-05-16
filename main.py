@@ -29,7 +29,7 @@ class Variables:
 
         self.MOVE_SPEED = 20
 
-        # Clock and FPS
+        # Make the calock and FPS
         self.clock = pygame.time.Clock()
         self.FPS = 5
 
