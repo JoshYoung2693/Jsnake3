@@ -27,11 +27,12 @@ class Variables:
         self.LEFT = 'left'
         self.RIGHT = 'right'
 
+        # Make a constant to contain the amount moved per frame
         self.MOVE_SPEED = 20
 
         # Make the calock and FPS
         self.clock = pygame.time.Clock()
-        self.FPS = 5
+        self.FPS = 10
 
         # Snake length starts at 100 pixels, but move speed streches it out
         self.length = 100
@@ -39,6 +40,9 @@ class Variables:
 
         # Make a count variable (for list purposes)
         self.count = 0
+
+        # Make a variable to track if the snake is growing
+        self.growing = False
 
         # Make x and y lists
         self.x_list = []
@@ -125,6 +129,13 @@ class PlayerHead:
         self.variables.x_list.append(self.head.x)
         self.variables.y_list.append(self.head.y)
 
+        # Remove the first digit of the list, if the snake isn't growing
+        # Don't remove the last digit if the snake hasn't streched out
+        if self.variables.count > self.variables.length:
+            if not(self.variables.growing):
+                self.variables.x_list.pop(0)
+                self.variables.y_list.pop(0)
+
     # Draw the head onto the screen
     def draw(self):
         pygame.draw.rect(self.variables.window_surface, self.color, self.head)
@@ -138,6 +149,25 @@ class PlayerHead:
     def die(self):
         pygame.quit()
         sys.exit()
+
+    # Check if the snake is eating itself
+    def check_for_self_eating(self):
+        # Make a temporary list containing tuples of the snake's coordinates
+        back_half_of_snake = list(zip(self.variables.x_list, self.variables.y_list))
+
+        # Remove the head (as the head is always colliding with the head)
+        back_half_of_snake.pop()
+
+        # Remove the next one, if the snake is long enough, because
+            # It is right next to the head and it causes issues
+        if len(back_half_of_snake) >= 3:
+            back_half_of_snake.pop()
+            back_half_of_snake.pop()
+
+        # Check if the head is in the list of coordinates
+        if (self.head.x, self.head.y) in back_half_of_snake:
+            # Kill the player (as they are eating themself)
+            self.die()
     
 
 # Make the Tail object
@@ -160,10 +190,10 @@ class PlayerTail:
             index = (self.variables.count - self.variables.length)
 
             # Change the tail's x position to the place that the head used to be in
-            self.tail.x = self.variables.x_list[index]
+            self.tail.x = self.variables.x_list[0]
 
             # Change the tail's y position to the place that the head used to be in
-            self.tail.y = self.variables.y_list[index] 
+            self.tail.y = self.variables.y_list[0] 
     
     # Draw the tail onto the screen
     def draw(self):
@@ -206,30 +236,45 @@ while not dead:
 
             # If the player presses the left key
             if event.key == K_LEFT or event.key == K_a:
-                # Move the head to the left
-                head.direction = variables.LEFT
+                # If it isn't going right
+                if head.direction != variables.RIGHT:
+                    # Move the head to the left
+                    head.direction = variables.LEFT
 
             # If the player presses the right key 
             if event.key == K_RIGHT or event.key == K_d:
-                # Move the head to the right
-                head.direction = variables.RIGHT
+                # If it isn't going left
+                if head.direction != variables.LEFT:
+                    # Move the head to the right
+                    head.direction = variables.RIGHT
 
             # If the player presses the up key
             if event.key == K_UP or event.key == K_w:
-                # Move the head upwards
-                head.direction = variables.UP
+                # If it isn't going down
+                if head.direction != variables.DOWN:
+                    # Move the head upwards
+                    head.direction = variables.UP
 
             # If the player presses the down key
             if event.key == K_DOWN or event.key == K_s:
-                # Move the head downwards
-                head.direction = variables.DOWN
+                # If it isn't going up
+                if head.direction != variables.UP:
+                    # Move the head downwards
+                    head.direction = variables.DOWN
 
             # If the player uses the cheat key
             if event.key == K_g:
                 # Make the snake longer
                 variables.length += 1
+                variables.growing = True
     
     # This is where I would blank out the screen, but I won't
+
+    # Check if the snake has eaten the apple
+    if head.head.x == apple.apple.x and head.head.y == apple.apple.y:
+        variables.length += 1
+        apple.make_apple()
+        variables.growing = True
 
     # Move the head
     head.move()
@@ -242,14 +287,15 @@ while not dead:
 
     # Draw the tail
     tail.draw()
-
-     # Check if the snake has eaten the apple
-    if head.head.x == apple.apple.x and head.head.y == apple.apple.y:
-        variables.length += 1
-        apple.make_apple()
-    
+   
     # Check if the snake is off the screen
     head.check_if_off_screen()
+
+    # Check if the snake is eating itself
+    head.check_for_self_eating()
+
+    # Set growing to false, as the frame is over
+    variables.growing = False
 
     # Increase the count by one
     variables.count += 1
