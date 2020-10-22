@@ -200,108 +200,110 @@ class PlayerTail:
         pygame.draw.rect(self.variables.window_surface, self.color, self.tail)
     
 
+def main():
+    ###### D E F I N I T I O N S ######
+    # Make an object with all of the variables inside of it
+    variables = Variables()
 
-###### D E F I N I T I O N S ######
-# Make an object with all of the variables inside of it
-variables = Variables()
+    # Make an apple
+    apple = Apple(variables)
 
-# Make an apple
-apple = Apple(variables)
+    # Make the player's head
+    head = PlayerHead(variables)
 
-# Make the player's head
-head = PlayerHead(variables)
+    # Make the player's tail
+    tail = PlayerTail(variables)
 
-# Make the player's tail
-tail = PlayerTail(variables)
-
-# Put an apple on the screen
-apple.make_apple()
+    # Put an apple on the screen
+    apple.make_apple()
 
 
-###### M A I N  L O O P ######
-# Create a sentinal to contain the status of the player
-dead = False
-while not dead:
+    ###### M A I N  L O O P ######
+    # Create a sentinal to contain the status of the player
 
-    # Pygame events loop
-    for event in pygame.event.get():
-        # If someone clicks on the 'x' in the top corner
-        if event.type == QUIT:
-            # End the game
-            pygame.quit()
-            sys.exit()
+    dead = False
+    while not dead:
 
-        # Take keyboard input
-        if event.type == KEYDOWN:
+        # Pygame events loop
+        for event in pygame.event.get():
+            # If someone clicks on the 'x' in the top corner
+            if event.type == QUIT:
+                # End the game
+                pygame.quit()
+                sys.exit()
 
-            # If the player presses the left key
-            if event.key == K_LEFT or event.key == K_a:
-                # If it isn't going right
-                if head.direction != variables.RIGHT:
-                    # Move the head to the left
-                    head.direction = variables.LEFT
+            # Take keyboard input
+            if event.type == KEYDOWN:
 
-            # If the player presses the right key 
-            if event.key == K_RIGHT or event.key == K_d:
-                # If it isn't going left
-                if head.direction != variables.LEFT:
-                    # Move the head to the right
-                    head.direction = variables.RIGHT
+                # If the player presses the left key
+                if event.key == K_LEFT or event.key == K_a:
+                    # If it isn't going right
+                    if head.direction != variables.RIGHT:
+                        # Move the head to the left
+                        head.direction = variables.LEFT
 
-            # If the player presses the up key
-            if event.key == K_UP or event.key == K_w:
-                # If it isn't going down
-                if head.direction != variables.DOWN:
-                    # Move the head upwards
-                    head.direction = variables.UP
+                # If the player presses the right key 
+                if event.key == K_RIGHT or event.key == K_d:
+                    # If it isn't going left
+                    if head.direction != variables.LEFT:
+                        # Move the head to the right
+                        head.direction = variables.RIGHT
 
-            # If the player presses the down key
-            if event.key == K_DOWN or event.key == K_s:
-                # If it isn't going up
-                if head.direction != variables.UP:
-                    # Move the head downwards
-                    head.direction = variables.DOWN
+                # If the player presses the up key
+                if event.key == K_UP or event.key == K_w:
+                    # If it isn't going down
+                    if head.direction != variables.DOWN:
+                        # Move the head upwards
+                        head.direction = variables.UP
 
-            # If the player uses the cheat key
-            if event.key == K_g:
-                # Make the snake longer
-                variables.length += 1
-                variables.growing = True
+                # If the player presses the down key
+                if event.key == K_DOWN or event.key == K_s:
+                    # If it isn't going up
+                    if head.direction != variables.UP:
+                        # Move the head downwards
+                        head.direction = variables.DOWN
+
+                # If the player uses the cheat key
+                if event.key == K_g:
+                    # Make the snake longer
+                    variables.length += 1
+                    variables.growing = True
+        
+        # This is where I would blank out the screen, but I won't
+
+        # Check if the snake has eaten the apple
+        if head.head.x == apple.apple.x and head.head.y == apple.apple.y:
+            variables.length += 1
+            apple.make_apple()
+            variables.growing = True
+
+        # Move the head
+        head.move()
+
+        # Move the tail
+        tail.move()
+
+        # Draw the head
+        head.draw()
+
+        # Draw the tail
+        tail.draw()
     
-    # This is where I would blank out the screen, but I won't
+        # Check if the snake is off the screen
+        head.check_if_off_screen()
 
-    # Check if the snake has eaten the apple
-    if head.head.x == apple.apple.x and head.head.y == apple.apple.y:
-        variables.length += 1
-        apple.make_apple()
-        variables.growing = True
+        # Check if the snake is eating itself
+        head.check_for_self_eating()
 
-    # Move the head
-    head.move()
+        # Set growing to false, as the frame is over
+        variables.growing = False
 
-    # Move the tail
-    tail.move()
+        # Increase the count by one
+        variables.count += 1
 
-    # Draw the head
-    head.draw()
+        # Update the display
+        pygame.display.update()
 
-    # Draw the tail
-    tail.draw()
-   
-    # Check if the snake is off the screen
-    head.check_if_off_screen()
-
-    # Check if the snake is eating itself
-    head.check_for_self_eating()
-
-    # Set growing to false, as the frame is over
-    variables.growing = False
-
-    # Increase the count by one
-    variables.count += 1
-
-    # Update the display
-    pygame.display.update()
-
-    # Wait until the next frame
-    variables.clock.tick(variables.FPS)
+        # Wait until the next frame
+        variables.clock.tick(variables.FPS)
+main()
